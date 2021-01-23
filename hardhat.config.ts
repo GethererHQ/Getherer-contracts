@@ -1,13 +1,14 @@
-import { task } from 'hardhat/config';
+import { task } from "hardhat/config";
 
-import { HardhatUserConfig } from 'hardhat/types';
+import { HardhatUserConfig } from "hardhat/types";
 
-import '@nomiclabs/hardhat-waffle';
-import 'hardhat-typechain';
+import "@nomiclabs/hardhat-waffle";
+import "hardhat-typechain";
+import "hardhat-gas-reporter";
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
-task('accounts', 'Prints the list of accounts', async (args, hre) => {
+task("accounts", "Prints the list of accounts", async (args, hre) => {
   const accounts = await hre.ethers.getSigners();
 
   for (const account of accounts) {
@@ -19,5 +20,10 @@ task('accounts', 'Prints the list of accounts', async (args, hre) => {
 // Go to https://hardhat.org/config/ to learn more
 
 export default {
-  solidity: '0.6.12',
+  solidity: "0.6.12",
+  gasReporter: {
+    currency: "USD",
+    gasPrice: 100,
+    enabled: process.env.REPORT_GAS ? true : false,
+  },
 };
