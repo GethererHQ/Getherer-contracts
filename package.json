@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "npm run compile",
-    "compile": "npx hardhat compile",
-    "test": "npx hardhat test"
+    "build": "hardhat compile",
+    "compile": "hardhat compile",
+    "test": "hardhat test"
   },
   "author": "",
   "license": "MIT",
@@ -17,6 +17,8 @@
     "@types/chai": "^4.2.14",
     "@types/mocha": "^8.0.4",
     "@types/node": "^14.14.10",
+    "@uniswap/v2-core": "^1.0.1",
+    "@uniswap/v2-periphery": "^1.1.0-beta.0",
     "chai": "^4.2.0",
     "ethereum-waffle": "^3.2.1",
     "ethers": "^5.0.23",

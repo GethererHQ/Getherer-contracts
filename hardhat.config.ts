@@ -20,7 +20,16 @@ task("accounts", "Prints the list of accounts", async (args, hre) => {
 // Go to https://hardhat.org/config/ to learn more
 
 export default {
-  solidity: "0.6.12",
+  solidity: {
+    compilers: [
+      {
+        version: "0.6.12",
+      },
+      {
+        version: "0.6.6",
+      },
+    ],
+  },
   gasReporter: {
     currency: "USD",
     gasPrice: 100,
