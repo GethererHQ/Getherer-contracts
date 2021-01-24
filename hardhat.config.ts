@@ -33,6 +33,6 @@ export default {
   gasReporter: {
     currency: "USD",
     gasPrice: 100,
-    enabled: process.env.REPORT_GAS ? true : false,
+    // enabled: process.env.REPORT_GAS ? true : false,
   },
 };
