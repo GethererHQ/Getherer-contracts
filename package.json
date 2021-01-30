@@ -6,7 +6,8 @@
   "scripts": {
     "build": "hardhat compile",
     "compile": "hardhat compile",
-    "test": "hardhat test"
+    "test": "hardhat test",
+    "clean": "rm -rf ./cache ./typechain ./artifacts"
   },
   "author": "",
   "license": "MIT",
