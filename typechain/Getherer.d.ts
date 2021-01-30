@@ -22,14 +22,20 @@ import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 
 interface GethererInterface extends ethers.utils.Interface {
   functions: {
+    "multiswap(address,address[],uint256[])": FunctionFragment;
     "swap(address,address,uint256)": FunctionFragment;
   };
 
+  encodeFunctionData(
+    functionFragment: "multiswap",
+    values: [string, string[], BigNumberish[]]
+  ): string;
   encodeFunctionData(
     functionFragment: "swap",
     values: [string, string, BigNumberish]
   ): string;
 
+  decodeFunctionResult(functionFragment: "multiswap", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "swap", data: BytesLike): Result;
 
   events: {};
@@ -49,6 +55,20 @@ export class Getherer extends Contract {
   interface: GethererInterface;
 
   functions: {
+    multiswap(
+      token: string,
+      users: string[],
+      amountsIn: BigNumberish[],
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "multiswap(address,address[],uint256[])"(
+      token: string,
+      users: string[],
+      amountsIn: BigNumberish[],
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
     swap(
       token: string,
       user: string,
@@ -63,6 +83,20 @@ export class Getherer extends Contract {
       overrides?: Overrides
     ): Promise<ContractTransaction>;
   };
+
+  multiswap(
+    token: string,
+    users: string[],
+    amountsIn: BigNumberish[],
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "multiswap(address,address[],uint256[])"(
+    token: string,
+    users: string[],
+    amountsIn: BigNumberish[],
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
 
   swap(
     token: string,
@@ -79,6 +113,20 @@ export class Getherer extends Contract {
   ): Promise<ContractTransaction>;
 
   callStatic: {
+    multiswap(
+      token: string,
+      users: string[],
+      amountsIn: BigNumberish[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "multiswap(address,address[],uint256[])"(
+      token: string,
+      users: string[],
+      amountsIn: BigNumberish[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     swap(
       token: string,
       user: string,
@@ -97,6 +145,20 @@ export class Getherer extends Contract {
   filters: {};
 
   estimateGas: {
+    multiswap(
+      token: string,
+      users: string[],
+      amountsIn: BigNumberish[],
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "multiswap(address,address[],uint256[])"(
+      token: string,
+      users: string[],
+      amountsIn: BigNumberish[],
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
     swap(
       token: string,
       user: string,
@@ -113,6 +175,20 @@ export class Getherer extends Contract {
   };
 
   populateTransaction: {
+    multiswap(
+      token: string,
+      users: string[],
+      amountsIn: BigNumberish[],
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "multiswap(address,address[],uint256[])"(
+      token: string,
+      users: string[],
+      amountsIn: BigNumberish[],
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
     swap(
       token: string,
       user: string,
