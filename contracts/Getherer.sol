@@ -16,10 +16,73 @@ contract Getherer {
 
     IUniswapV2Router02 private router;
 
+    SwapOrder[] public swaporder;
+    
+    struct SwapOrder {
+        address token;
+        address user;
+        uint256 amountOut;
+        uint256 amounts;
+    }
+
     receive() external payable {}
 
     constructor(address _routerAddress) public {
         router = IUniswapV2Router02(_routerAddress);
+    }
+
+    function poolswapETH(
+        address _token,
+        uint256 _amountOut
+    ) external payable {
+
+        // Store user data - could be different, e.g nested mapping
+
+        swaporder.push(SwapOrder({
+            token: _token, 
+            user: msg.sender, 
+            amountOut: _amountOut,  
+            amounts: msg.value}));
+
+        // emit event & issue token shares here
+    }
+
+    function multiswapETH(
+        address _token
+    ) external {
+        uint256 total = 0;
+
+        for (uint256 i = 0; i < swaporder.length; i++) {
+            total += swaporder[i].amountOut;
+        }
+
+        address[] memory path = new address[](2);
+        path[0] = router.WETH();
+        path[1] = _token;
+
+        uint256[] memory amountOut = getEstimatedTokenForETH(total, path);
+
+        uint256[] memory amounts = router.swapExactETHForTokens
+        {value:address(this).balance}(
+            amountOut[1], 
+            path, 
+            address(this), 
+            block.timestamp);
+
+
+        uint256 receivedBalance = amounts[amounts.length - 1];
+        
+        IERC20(_token).approve(address(this), receivedBalance);
+
+        for (uint256 i = 0; i < swaporder.length; i++){
+            // Tokens can have different decimal points!
+            uint256 payout = receivedBalance.mul(swaporder[i].amounts).div(1e18);
+            IERC20(_token).transferFrom(address(this), swaporder[i].user, payout);
+        }
+
+        // clean for new swappool
+        delete swaporder;
+
     }
 
     function swap(
@@ -70,5 +133,23 @@ contract Getherer {
             uint256 payout = receivedBalance.mul(amountsIn[i]).div(total);
             users[i].sendValue(payout);
         }
+    }
+
+    function getEstimatedTokenForETH(
+        uint256 amountIn, 
+        address[] memory path) 
+        public 
+        view 
+        returns (uint[] memory) {
+        return router.getAmountsOut(amountIn, path);
+    }
+    
+    function debugTransfers(address _token) public view returns(uint256 tokenAmount, uint256 totalAmount) {
+        
+        // Just to debug balances, should be deleted
+        
+        tokenAmount = IERC20(_token).balanceOf(address(this));
+        totalAmount = address(this).balance;
+        return (tokenAmount, totalAmount);
     }
 }
