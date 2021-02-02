@@ -17,6 +17,8 @@ contract Getherer {
     IUniswapV2Router02 private router;
 
     SwapOrder[] public swaporder;
+    uint256 total;
+    uint256 receivedBalance;
     
     struct SwapOrder {
         address token;
@@ -50,7 +52,7 @@ contract Getherer {
     function multiswapETH(
         address _token
     ) external {
-        uint256 total = 0;
+        total = 0;
 
         for (uint256 i = 0; i < swaporder.length; i++) {
             total += swaporder[i].amountOut;
@@ -70,7 +72,7 @@ contract Getherer {
             block.timestamp);
 
 
-        uint256 receivedBalance = amounts[amounts.length - 1];
+        receivedBalance = amounts[amounts.length - 1];
         
         IERC20(_token).approve(address(this), receivedBalance);
 
