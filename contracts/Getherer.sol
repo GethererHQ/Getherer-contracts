@@ -137,19 +137,19 @@ contract Getherer {
 
     function getEstimatedTokenForETH(
         uint256 amountIn, 
-        address[] memory path) 
-        public 
-        view 
-        returns (uint[] memory) {
+        address[] memory path
+    ) public view  returns (uint[] memory) {
         return router.getAmountsOut(amountIn, path);
     }
     
-    function debugTransfers(address _token) public view returns(uint256 tokenAmount, uint256 totalAmount) {
+    function debugTransfers(
+        address _token
+    ) public view returns(uint256 tokenAmount, uint256 ethAmount) {
         
         // Just to debug balances, should be deleted
         
         tokenAmount = IERC20(_token).balanceOf(address(this));
-        totalAmount = address(this).balance;
-        return (tokenAmount, totalAmount);
+        ethAmount = address(this).balance;
+        return (tokenAmount, ethAmount);
     }
 }
