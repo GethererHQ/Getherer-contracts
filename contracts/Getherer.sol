@@ -52,8 +52,6 @@ contract Getherer {
     function multiswapETH(
         address _token
     ) external {
-        total = 0;
-
         for (uint256 i = 0; i < swaporder.length; i++) {
             total += swaporder[i].amountOut;
         }
@@ -74,6 +72,11 @@ contract Getherer {
 
         receivedBalance = amounts[amounts.length - 1];
         
+    }
+
+    function withdraw(
+        address _token
+    ) external {
         IERC20(_token).approve(address(this), receivedBalance);
 
         for (uint256 i = 0; i < swaporder.length; i++){
@@ -84,7 +87,6 @@ contract Getherer {
 
         // clean for new swappool
         delete swaporder;
-
     }
 
     function swap(
@@ -137,21 +139,24 @@ contract Getherer {
         }
     }
 
-    function getEstimatedTokenForETH(
-        uint256 amountIn, 
-        address[] memory path
-    ) public view  returns (uint[] memory) {
+    function getEstimatedTokenForETH(uint256 amountIn, address[] memory path) public view returns (uint[] memory) {
         return router.getAmountsOut(amountIn, path);
     }
+
+    function debugETH() public view returns (uint256 ethAmount) {
+
+        // Just to debug balance, should be deleted
+
+        ethAmount = address(this).balance;
+        return (ethAmount);
+    }
     
-    function debugTransfers(
-        address _token
-    ) public view returns(uint256 tokenAmount, uint256 ethAmount) {
+    function debugToken(address _token) public view returns(uint256 tokenAmount) {
         
-        // Just to debug balances, should be deleted
+        // Just to debug balance, should be deleted
         
         tokenAmount = IERC20(_token).balanceOf(address(this));
-        ethAmount = address(this).balance;
-        return (tokenAmount, ethAmount);
+        return (tokenAmount);
     }
+
 }

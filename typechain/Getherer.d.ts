@@ -23,19 +23,19 @@ import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 
 interface GethererInterface extends ethers.utils.Interface {
   functions: {
-    "debugTransfers(address)": FunctionFragment;
+    "debugETH()": FunctionFragment;
+    "debugToken(address)": FunctionFragment;
     "getEstimatedTokenForETH(uint256,address[])": FunctionFragment;
     "multiswap(address,address[],uint256[])": FunctionFragment;
     "multiswapETH(address)": FunctionFragment;
     "poolswapETH(address,uint256)": FunctionFragment;
     "swap(address,address,uint256)": FunctionFragment;
     "swaporder(uint256)": FunctionFragment;
+    "withdraw(address)": FunctionFragment;
   };
 
-  encodeFunctionData(
-    functionFragment: "debugTransfers",
-    values: [string]
-  ): string;
+  encodeFunctionData(functionFragment: "debugETH", values?: undefined): string;
+  encodeFunctionData(functionFragment: "debugToken", values: [string]): string;
   encodeFunctionData(
     functionFragment: "getEstimatedTokenForETH",
     values: [BigNumberish, string[]]
@@ -60,11 +60,10 @@ interface GethererInterface extends ethers.utils.Interface {
     functionFragment: "swaporder",
     values: [BigNumberish]
   ): string;
+  encodeFunctionData(functionFragment: "withdraw", values: [string]): string;
 
-  decodeFunctionResult(
-    functionFragment: "debugTransfers",
-    data: BytesLike
-  ): Result;
+  decodeFunctionResult(functionFragment: "debugETH", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "debugToken", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getEstimatedTokenForETH",
     data: BytesLike
@@ -80,6 +79,7 @@ interface GethererInterface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "swap", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "swaporder", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
 
   events: {};
 }
@@ -98,24 +98,34 @@ export class Getherer extends Contract {
   interface: GethererInterface;
 
   functions: {
-    debugTransfers(
-      _token: string,
+    debugETH(
       overrides?: CallOverrides
     ): Promise<{
-      tokenAmount: BigNumber;
       ethAmount: BigNumber;
       0: BigNumber;
-      1: BigNumber;
     }>;
 
-    "debugTransfers(address)"(
+    "debugETH()"(
+      overrides?: CallOverrides
+    ): Promise<{
+      ethAmount: BigNumber;
+      0: BigNumber;
+    }>;
+
+    debugToken(
       _token: string,
       overrides?: CallOverrides
     ): Promise<{
       tokenAmount: BigNumber;
-      ethAmount: BigNumber;
       0: BigNumber;
-      1: BigNumber;
+    }>;
+
+    "debugToken(address)"(
+      _token: string,
+      overrides?: CallOverrides
+    ): Promise<{
+      tokenAmount: BigNumber;
+      0: BigNumber;
     }>;
 
     getEstimatedTokenForETH(
@@ -211,27 +221,28 @@ export class Getherer extends Contract {
       2: BigNumber;
       3: BigNumber;
     }>;
+
+    withdraw(
+      _token: string,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "withdraw(address)"(
+      _token: string,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
   };
 
-  debugTransfers(
-    _token: string,
-    overrides?: CallOverrides
-  ): Promise<{
-    tokenAmount: BigNumber;
-    ethAmount: BigNumber;
-    0: BigNumber;
-    1: BigNumber;
-  }>;
+  debugETH(overrides?: CallOverrides): Promise<BigNumber>;
 
-  "debugTransfers(address)"(
+  "debugETH()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+  debugToken(_token: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+  "debugToken(address)"(
     _token: string,
     overrides?: CallOverrides
-  ): Promise<{
-    tokenAmount: BigNumber;
-    ethAmount: BigNumber;
-    0: BigNumber;
-    1: BigNumber;
-  }>;
+  ): Promise<BigNumber>;
 
   getEstimatedTokenForETH(
     amountIn: BigNumberish,
@@ -323,26 +334,24 @@ export class Getherer extends Contract {
     3: BigNumber;
   }>;
 
-  callStatic: {
-    debugTransfers(
-      _token: string,
-      overrides?: CallOverrides
-    ): Promise<{
-      tokenAmount: BigNumber;
-      ethAmount: BigNumber;
-      0: BigNumber;
-      1: BigNumber;
-    }>;
+  withdraw(_token: string, overrides?: Overrides): Promise<ContractTransaction>;
 
-    "debugTransfers(address)"(
+  "withdraw(address)"(
+    _token: string,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  callStatic: {
+    debugETH(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "debugETH()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    debugToken(_token: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+    "debugToken(address)"(
       _token: string,
       overrides?: CallOverrides
-    ): Promise<{
-      tokenAmount: BigNumber;
-      ethAmount: BigNumber;
-      0: BigNumber;
-      1: BigNumber;
-    }>;
+    ): Promise<BigNumber>;
 
     getEstimatedTokenForETH(
       amountIn: BigNumberish,
@@ -430,17 +439,25 @@ export class Getherer extends Contract {
       2: BigNumber;
       3: BigNumber;
     }>;
+
+    withdraw(_token: string, overrides?: CallOverrides): Promise<void>;
+
+    "withdraw(address)"(
+      _token: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
   };
 
   filters: {};
 
   estimateGas: {
-    debugTransfers(
-      _token: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    debugETH(overrides?: CallOverrides): Promise<BigNumber>;
 
-    "debugTransfers(address)"(
+    "debugETH()"(overrides?: CallOverrides): Promise<BigNumber>;
+
+    debugToken(_token: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+    "debugToken(address)"(
       _token: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -513,15 +530,26 @@ export class Getherer extends Contract {
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    withdraw(_token: string, overrides?: Overrides): Promise<BigNumber>;
+
+    "withdraw(address)"(
+      _token: string,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    debugTransfers(
+    debugETH(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    "debugETH()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    debugToken(
       _token: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    "debugTransfers(address)"(
+    "debugToken(address)"(
       _token: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
@@ -596,6 +624,16 @@ export class Getherer extends Contract {
     "swaporder(uint256)"(
       arg0: BigNumberish,
       overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    withdraw(
+      _token: string,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "withdraw(address)"(
+      _token: string,
+      overrides?: Overrides
     ): Promise<PopulatedTransaction>;
   };
 }
