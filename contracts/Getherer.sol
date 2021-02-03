@@ -72,11 +72,19 @@ contract Getherer {
         uint256 receivedBalance = amounts[amounts.length - 1];
 
         IERC20(_token).approve(address(this), receivedBalance);
+        uint256 SwapAmount = 0;
 
         for (uint256 i = 0; i < swaporder.length; i++){
             // This division will work only if pooled swaps are below 1e18 wei!
-            uint256 payout = receivedBalance.mul(swaporder[i].amounts).div(1e18);
-            IERC20(_token).transferFrom(address(this), swaporder[i].user, payout);
+            // There should be nicer way to do this, here or when matching swaps together
+            SwapAmount += swaporder[i].amounts;
+            if (SwapAmount > 1e18) {
+                uint256 payout = receivedBalance.mul(swaporder[i].amounts).div(1e19);
+                IERC20(_token).transferFrom(address(this), swaporder[i].user, payout);
+            } else {
+                uint256 payout = receivedBalance.mul(swaporder[i].amounts).div(1e18);
+                IERC20(_token).transferFrom(address(this), swaporder[i].user, payout);
+            }
         }
 
         // clean for new swappool

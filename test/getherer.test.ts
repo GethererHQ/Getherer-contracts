@@ -139,9 +139,53 @@ describe("Getherer", () => {
     console.log("User3 balance", ethers.utils.formatEther(user3BalanceAfter));
   });
 
-  it("Multiswap ETH to Token", async function () {
+  it("Multiswap ETH to Token, when input smaller than 1ETH", async function () {
     // Attempt to swap
-    const toSwap1 = ethers.utils.parseEther("0.25");
+    const toSwap1 = ethers.utils.parseEther("0.33");
+    const amountOut = ethers.BigNumber.from("100");
+
+    // 3x poolswap call from user
+    const userArray = [user1, user2, user3];
+
+    for (let users of userArray) {
+      getherer = getherer.connect(users);
+      
+      await getherer.poolswapETH(
+        tokenA.address,
+        amountOut,
+        {value:toSwap1}
+      );
+    
+    }
+
+    const amountETH = await getherer.debugETH();
+    // Should be equal to user transfers
+    console.log('Amount of ETH held in contract:', amountETH);
+
+    getherer = getherer.connect(relay);
+
+    await getherer.multiswapETH(
+      tokenA.address
+    );
+    
+    const amountToken = await getherer.debugToken(tokenA.address);
+
+    // Should be 0
+    console.log('Amount of Tokens after swap', amountToken)
+
+    const user1BalanceAfter = await tokenA.balanceOf(user1.address);
+    const user2BalanceAfter = await tokenA.balanceOf(user2.address);
+    const user3BalanceAfter = await tokenA.balanceOf(user3.address);
+
+    console.log("User1 balance", ethers.utils.formatEther(user1BalanceAfter));
+    console.log("User2 balance", ethers.utils.formatEther(user2BalanceAfter));
+    console.log("User3 balance", ethers.utils.formatEther(user3BalanceAfter));
+    
+  });
+
+  it("Multiswap ETH to Token, when input bigger than 1ETH", async function () {
+    // Attempt to swap
+    const toSwap1 = ethers.utils.parseEther("1.33");
     const amountOut = ethers.BigNumber.from("100");
 
     // 3x poolswap call from user
