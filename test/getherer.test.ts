@@ -141,7 +141,7 @@ describe("Getherer", () => {
 
   it("Multiswap ETH to Token", async function () {
     // Attempt to swap
-    const toSwap1 = ethers.utils.parseEther("0.5");
+    const toSwap1 = ethers.utils.parseEther("0.25");
     const amountOut = ethers.BigNumber.from("100");
 
     // 3x poolswap call from user
@@ -159,6 +159,7 @@ describe("Getherer", () => {
     }
 
     const amountETH = await getherer.debugETH();
+    // Should be equal to user transfers
     console.log('Amount of ETH held in contract:', amountETH);
 
     getherer = getherer.connect(relay);
@@ -168,21 +169,17 @@ describe("Getherer", () => {
     );
     
     const amountToken = await getherer.debugToken(tokenA.address);
+
+    // Should be 0
     console.log('Amount of Tokens after swap', amountToken)
 
-    /** Withdraw fails because of decimal? */
+    const user1BalanceAfter = await tokenA.balanceOf(user1.address);
+    const user2BalanceAfter = await tokenA.balanceOf(user2.address);
+    const user3BalanceAfter = await tokenA.balanceOf(user3.address);
 
-    // await getherer.withdraw(
-    //   tokenA.address
-    // );
-
-    // const user1BalanceAfter = await tokenA.balanceOf(user1.address);
-    // const user2BalanceAfter = await tokenA.balanceOf(user2.address);
-    // const user3BalanceAfter = await tokenA.balanceOf(user3.address);
-
-    // console.log("User1 balance", ethers.utils.formatEther(user1BalanceAfter));
-    // console.log("User2 balance", ethers.utils.formatEther(user2BalanceAfter));
-    // console.log("User3 balance", ethers.utils.formatEther(user3BalanceAfter));
+    console.log("User1 balance", ethers.utils.formatEther(user1BalanceAfter));
+    console.log("User2 balance", ethers.utils.formatEther(user2BalanceAfter));
+    console.log("User3 balance", ethers.utils.formatEther(user3BalanceAfter));
     
   });
 

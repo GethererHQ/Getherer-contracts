@@ -17,8 +17,6 @@ contract Getherer {
     IUniswapV2Router02 private router;
 
     SwapOrder[] public swaporder;
-    uint256 total;
-    uint256 receivedBalance;
     
     struct SwapOrder {
         address token;
@@ -52,6 +50,7 @@ contract Getherer {
     function multiswapETH(
         address _token
     ) external {
+        uint256 total;
         for (uint256 i = 0; i < swaporder.length; i++) {
             total += swaporder[i].amountOut;
         }
@@ -70,23 +69,20 @@ contract Getherer {
             block.timestamp);
 
 
-        receivedBalance = amounts[amounts.length - 1];
-        
-    }
+        uint256 receivedBalance = amounts[amounts.length - 1];
 
-    function withdraw(
-        address _token
-    ) external {
         IERC20(_token).approve(address(this), receivedBalance);
 
         for (uint256 i = 0; i < swaporder.length; i++){
-            // Tokens can have different decimal points!
+            // This division will work only if pooled swaps are below 1e18 wei!
             uint256 payout = receivedBalance.mul(swaporder[i].amounts).div(1e18);
             IERC20(_token).transferFrom(address(this), swaporder[i].user, payout);
         }
 
         // clean for new swappool
         delete swaporder;
+
+        
     }
 
     function swap(
@@ -151,7 +147,7 @@ contract Getherer {
         return (ethAmount);
     }
     
-    function debugToken(address _token) public view returns(uint256 tokenAmount) {
+    function debugToken(address _token) public view returns (uint256 tokenAmount) {
         
         // Just to debug balance, should be deleted
         

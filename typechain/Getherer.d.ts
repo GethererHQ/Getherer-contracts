@@ -31,7 +31,6 @@ interface GethererInterface extends ethers.utils.Interface {
     "poolswapETH(address,uint256)": FunctionFragment;
     "swap(address,address,uint256)": FunctionFragment;
     "swaporder(uint256)": FunctionFragment;
-    "withdraw(address)": FunctionFragment;
   };
 
   encodeFunctionData(functionFragment: "debugETH", values?: undefined): string;
@@ -60,7 +59,6 @@ interface GethererInterface extends ethers.utils.Interface {
     functionFragment: "swaporder",
     values: [BigNumberish]
   ): string;
-  encodeFunctionData(functionFragment: "withdraw", values: [string]): string;
 
   decodeFunctionResult(functionFragment: "debugETH", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "debugToken", data: BytesLike): Result;
@@ -79,7 +77,6 @@ interface GethererInterface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "swap", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "swaporder", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
 
   events: {};
 }
@@ -221,16 +218,6 @@ export class Getherer extends Contract {
       2: BigNumber;
       3: BigNumber;
     }>;
-
-    withdraw(
-      _token: string,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
-
-    "withdraw(address)"(
-      _token: string,
-      overrides?: Overrides
-    ): Promise<ContractTransaction>;
   };
 
   debugETH(overrides?: CallOverrides): Promise<BigNumber>;
@@ -334,13 +321,6 @@ export class Getherer extends Contract {
     3: BigNumber;
   }>;
 
-  withdraw(_token: string, overrides?: Overrides): Promise<ContractTransaction>;
-
-  "withdraw(address)"(
-    _token: string,
-    overrides?: Overrides
-  ): Promise<ContractTransaction>;
-
   callStatic: {
     debugETH(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -439,13 +419,6 @@ export class Getherer extends Contract {
       2: BigNumber;
       3: BigNumber;
     }>;
-
-    withdraw(_token: string, overrides?: CallOverrides): Promise<void>;
-
-    "withdraw(address)"(
-      _token: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
   };
 
   filters: {};
@@ -529,13 +502,6 @@ export class Getherer extends Contract {
     "swaporder(uint256)"(
       arg0: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    withdraw(_token: string, overrides?: Overrides): Promise<BigNumber>;
-
-    "withdraw(address)"(
-      _token: string,
-      overrides?: Overrides
     ): Promise<BigNumber>;
   };
 
@@ -624,16 +590,6 @@ export class Getherer extends Contract {
     "swaporder(uint256)"(
       arg0: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    withdraw(
-      _token: string,
-      overrides?: Overrides
-    ): Promise<PopulatedTransaction>;
-
-    "withdraw(address)"(
-      _token: string,
-      overrides?: Overrides
     ): Promise<PopulatedTransaction>;
   };
 }
