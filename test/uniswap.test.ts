@@ -19,7 +19,7 @@ describe("Uniswap", () => {
 
   //   const tokenContract = await ERC20Factory.deploy(TOTALSUPPLY);
   // });
-  it("Deploy a token", async function () {
+  it("Swap ETH to token", async function () {
     const [deployer] = await ethers.getSigners();
     const ERC20Factory = new ethers.ContractFactory(ERC20.abi, ERC20.bytecode, deployer);
 
@@ -72,8 +72,7 @@ describe("Uniswap", () => {
 
     const userRouter = router.connect(user);
 
-    // Call the tx but not execute
-    const swapTx = await userRouter.populateTransaction.swapExactETHForTokens(
+    const txRes = await userRouter.swapExactETHForTokens(
       1,
       [wethContract.address, tokenAContract.address],
       user.address,
@@ -82,7 +81,58 @@ describe("Uniswap", () => {
         value: toSwap,
       },
     );
-    const res = await user.call(swapTx);
-    console.log(res);
+    console.log(txRes);
+  });
+
+  it("Swap Token to ETH", async function () {
+    const [deployer, user] = await ethers.getSigners();
+
+    // Deploy token
+    const ERC20Factory = new ethers.ContractFactory(ERC20.abi, ERC20.bytecode, deployer);
+    const tokenAContract = await ERC20Factory.deploy(TOTALSUPPLY);
+    // Transfers some tokens to the user
+    await tokenAContract.transfer(user.address, ethers.utils.parseEther("20"));
+
+    // Deploy Weth
+    const WethFactory = new ethers.ContractFactory(weth.abi, weth.bytecode, deployer);
+    const wethContract = await WethFactory.deploy();
+
+    // Deploy Factory
+    const UniswapFactory = new ethers.ContractFactory(UniswapV2Factory.abi, UniswapV2Factory.bytecode, deployer);
+    const uniswapFactoryContract = await UniswapFactory.deploy(deployer.address);
+
+    // Deploy Router
+    const UniswapV2Router02Factory = new ethers.ContractFactory(
+      UniswapV2Router02.abi,
+      UniswapV2Router02.bytecode,
+      deployer,
+    );
+    const router = await UniswapV2Router02Factory.deploy(uniswapFactoryContract.address, wethContract.address);
+
+    const toSupply = ethers.utils.parseEther("500");
+
+    await tokenAContract.approve(router.address, toSupply);
+
+    const deadline = 2000000000;
+
+    await router.addLiquidityETH(tokenAContract.address, toSupply, 1, 1, deployer.address, deadline, {
+      value: ethers.utils.parseEther("10"),
+    });
+
+    const toSwap = ethers.utils.parseEther("20");
+
+    const userRouter = router.connect(user);
+    const userToken = tokenAContract.connect(user);
+
+    await userToken.approve(router.address, toSwap);
+
+    const txRes = await userRouter.swapExactTokensForETH(
+      toSwap,
+      1,
+      [tokenAContract.address, wethContract.address],
+      user.address,
+      deadline,
+    );
+    console.log(txRes);
   });
 });
