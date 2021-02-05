@@ -17,12 +17,12 @@ contract Getherer {
     IUniswapV2Router02 private router;
 
     SwapOrder[] public swaporder;
-    
+
+    mapping(address => SwapOrder[]) private _swapOrders;
+
     struct SwapOrder {
-        address token;
         address user;
-        uint256 amountOut;
-        uint256 amounts;
+        uint256 amountIn;
     }
 
     receive() external payable {}
@@ -31,28 +31,14 @@ contract Getherer {
         router = IUniswapV2Router02(_routerAddress);
     }
 
-    function poolswapETH(
-        address _token,
-        uint256 _amountOut
-    ) external payable {
-
-        // Store user data - could be different, e.g nested mapping
-
-        swaporder.push(SwapOrder({
-            token: _token, 
-            user: msg.sender, 
-            amountOut: _amountOut,  
-            amounts: msg.value}));
-
-        // emit event & issue token shares here
+    function poolswapETH(address _token, uint256 _amountOut) external payable {
+        _swapOrders[_token].push(SwapOrder({ user: msg.sender, amountIn: msg.value }));
     }
 
-    function multiswapETH(
-        address _token
-    ) external {
+    function multiswapETH(address _token) external {
         uint256 total;
-        for (uint256 i = 0; i < swaporder.length; i++) {
-            total += swaporder[i].amountOut;
+        for (uint256 i = 0; i < _swapOrders[_token].length; i++) {
+            total += _swapOrders[_token][i].amountIn;
         }
 
         address[] memory path = new address[](2);
@@ -61,36 +47,15 @@ contract Getherer {
 
         uint256[] memory amountOut = getEstimatedTokenForETH(total, path);
 
-        uint256[] memory amounts = router.swapExactETHForTokens
-        {value:address(this).balance}(
-            amountOut[1], 
-            path, 
-            address(this), 
-            block.timestamp);
-
+        uint256[] memory amounts =
+            router.swapExactETHForTokens{ value: total }(amountOut[1], path, address(this), block.timestamp);
 
         uint256 receivedBalance = amounts[amounts.length - 1];
 
-        IERC20(_token).approve(address(this), receivedBalance);
-        uint256 SwapAmount = 0;
-
-        for (uint256 i = 0; i < swaporder.length; i++){
-            // This division will work only if pooled swaps are below 1e18 wei!
-            // There should be nicer way to do this, here or when matching swaps together
-            SwapAmount += swaporder[i].amounts;
-            if (SwapAmount > 1e18) {
-                uint256 payout = receivedBalance.mul(swaporder[i].amounts).div(1e19);
-                IERC20(_token).transferFrom(address(this), swaporder[i].user, payout);
-            } else {
-                uint256 payout = receivedBalance.mul(swaporder[i].amounts).div(1e18);
-                IERC20(_token).transferFrom(address(this), swaporder[i].user, payout);
-            }
+        for (uint256 i = 0; i < _swapOrders[_token].length; i++) {
+            uint256 payout = receivedBalance.mul(_swapOrders[_token][i].amountIn).div(total);
+            IERC20(_token).transfer(_swapOrders[_token][i].user, payout);
         }
-
-        // clean for new swappool
-        delete swaporder;
-
-        
     }
 
     function swap(
@@ -143,24 +108,7 @@ contract Getherer {
         }
     }
 
-    function getEstimatedTokenForETH(uint256 amountIn, address[] memory path) public view returns (uint[] memory) {
+    function getEstimatedTokenForETH(uint256 amountIn, address[] memory path) public view returns (uint256[] memory) {
         return router.getAmountsOut(amountIn, path);
     }
-
-    function debugETH() public view returns (uint256 ethAmount) {
-
-        // Just to debug balance, should be deleted
-
-        ethAmount = address(this).balance;
-        return (ethAmount);
-    }
-    
-    function debugToken(address _token) public view returns (uint256 tokenAmount) {
-        
-        // Just to debug balance, should be deleted
-        
-        tokenAmount = IERC20(_token).balanceOf(address(this));
-        return (tokenAmount);
-    }
-
 }

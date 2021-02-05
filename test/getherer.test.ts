@@ -147,40 +147,25 @@ describe("Getherer", () => {
     // 3x poolswap call from user
     const userArray = [user1, user2, user3];
 
-    for (let users of userArray) {
-      getherer = getherer.connect(users);
-      
-      await getherer.poolswapETH(
-        tokenA.address,
-        amountOut,
-        {value:toSwap1}
-      );
-    
+    for (const user of userArray) {
+      getherer = getherer.connect(user);
+
+      await getherer.poolswapETH(tokenA.address, amountOut, { value: toSwap1 });
     }
-
-    const amountETH = await getherer.debugETH();
-    // Should be equal to user transfers
-    console.log('Amount of ETH held in contract:', amountETH);
-
     getherer = getherer.connect(relay);
 
-    await getherer.multiswapETH(
-      tokenA.address
-    );
-    
-    const amountToken = await getherer.debugToken(tokenA.address);
-
-    // Should be 0
-    console.log('Amount of Tokens after swap', amountToken)
+    await getherer.multiswapETH(tokenA.address);
 
     const user1BalanceAfter = await tokenA.balanceOf(user1.address);
     const user2BalanceAfter = await tokenA.balanceOf(user2.address);
     const user3BalanceAfter = await tokenA.balanceOf(user3.address);
 
+    const poolBalance = await tokenA.balanceOf(getherer.address);
+    // expect(ethers.utils.formatEther(poolBalance)).to.equal("0");
+
     console.log("User1 balance", ethers.utils.formatEther(user1BalanceAfter));
     console.log("User2 balance", ethers.utils.formatEther(user2BalanceAfter));
     console.log("User3 balance", ethers.utils.formatEther(user3BalanceAfter));
-    
   });
 
   it("Multiswap ETH to Token, when input bigger than 1ETH", async function () {
@@ -191,31 +176,15 @@ describe("Getherer", () => {
     // 3x poolswap call from user
     const userArray = [user1, user2, user3];
 
-    for (let users of userArray) {
+    for (const users of userArray) {
       getherer = getherer.connect(users);
-      
-      await getherer.poolswapETH(
-        tokenA.address,
-        amountOut,
-        {value:toSwap1}
-      );
-    
-    }
 
-    const amountETH = await getherer.debugETH();
-    // Should be equal to user transfers
-    console.log('Amount of ETH held in contract:', amountETH);
+      await getherer.poolswapETH(tokenA.address, amountOut, { value: toSwap1 });
+    }
 
     getherer = getherer.connect(relay);
 
-    await getherer.multiswapETH(
-      tokenA.address
-    );
-    
-    const amountToken = await getherer.debugToken(tokenA.address);
-
-    // Should be 0
-    console.log('Amount of Tokens after swap', amountToken)
+    await getherer.multiswapETH(tokenA.address);
 
     const user1BalanceAfter = await tokenA.balanceOf(user1.address);
     const user2BalanceAfter = await tokenA.balanceOf(user2.address);
@@ -224,7 +193,5 @@ describe("Getherer", () => {
     console.log("User1 balance", ethers.utils.formatEther(user1BalanceAfter));
     console.log("User2 balance", ethers.utils.formatEther(user2BalanceAfter));
     console.log("User3 balance", ethers.utils.formatEther(user3BalanceAfter));
-    
   });
-
 });
