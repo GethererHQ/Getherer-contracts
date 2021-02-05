@@ -14,6 +14,7 @@ import {
   Contract,
   ContractTransaction,
   Overrides,
+  PayableOverrides,
   CallOverrides,
 } from "@ethersproject/contracts";
 import { BytesLike } from "@ethersproject/bytes";
@@ -22,21 +23,48 @@ import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 
 interface GethererInterface extends ethers.utils.Interface {
   functions: {
-    "multiswap(address,address[],uint256[])": FunctionFragment;
-    "swap(address,address,uint256)": FunctionFragment;
+    "getEstimatedTokenForETH(uint256,address[])": FunctionFragment;
+    "multiswapETHToToken(address)": FunctionFragment;
+    "multiswapTokenToETH(address,address[],uint256[])": FunctionFragment;
+    "poolSwapETH(address)": FunctionFragment;
+    "swaporder(uint256)": FunctionFragment;
   };
 
   encodeFunctionData(
-    functionFragment: "multiswap",
-    values: [string, string[], BigNumberish[]]
+    functionFragment: "getEstimatedTokenForETH",
+    values: [BigNumberish, string[]]
   ): string;
   encodeFunctionData(
-    functionFragment: "swap",
-    values: [string, string, BigNumberish]
+    functionFragment: "multiswapETHToToken",
+    values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "multiswapTokenToETH",
+    values: [string, string[], BigNumberish[]]
+  ): string;
+  encodeFunctionData(functionFragment: "poolSwapETH", values: [string]): string;
+  encodeFunctionData(
+    functionFragment: "swaporder",
+    values: [BigNumberish]
   ): string;
 
-  decodeFunctionResult(functionFragment: "multiswap", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "swap", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "getEstimatedTokenForETH",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "multiswapETHToToken",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "multiswapTokenToETH",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "poolSwapETH",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "swaporder", data: BytesLike): Result;
 
   events: {};
 }
@@ -55,152 +83,323 @@ export class Getherer extends Contract {
   interface: GethererInterface;
 
   functions: {
-    multiswap(
+    getEstimatedTokenForETH(
+      amountIn: BigNumberish,
+      path: string[],
+      overrides?: CallOverrides
+    ): Promise<{
+      0: BigNumber[];
+    }>;
+
+    "getEstimatedTokenForETH(uint256,address[])"(
+      amountIn: BigNumberish,
+      path: string[],
+      overrides?: CallOverrides
+    ): Promise<{
+      0: BigNumber[];
+    }>;
+
+    multiswapETHToToken(
+      _token: string,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    "multiswapETHToToken(address)"(
+      _token: string,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
+
+    multiswapTokenToETH(
       token: string,
       users: string[],
       amountsIn: BigNumberish[],
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
-    "multiswap(address,address[],uint256[])"(
+    "multiswapTokenToETH(address,address[],uint256[])"(
       token: string,
       users: string[],
       amountsIn: BigNumberish[],
       overrides?: Overrides
     ): Promise<ContractTransaction>;
 
-    swap(
-      token: string,
-      user: string,
-      amountIn: BigNumberish,
-      overrides?: Overrides
+    poolSwapETH(
+      _token: string,
+      overrides?: PayableOverrides
     ): Promise<ContractTransaction>;
 
-    "swap(address,address,uint256)"(
-      token: string,
-      user: string,
-      amountIn: BigNumberish,
-      overrides?: Overrides
+    "poolSwapETH(address)"(
+      _token: string,
+      overrides?: PayableOverrides
     ): Promise<ContractTransaction>;
+
+    swaporder(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<{
+      user: string;
+      amountIn: BigNumber;
+      0: string;
+      1: BigNumber;
+    }>;
+
+    "swaporder(uint256)"(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<{
+      user: string;
+      amountIn: BigNumber;
+      0: string;
+      1: BigNumber;
+    }>;
   };
 
-  multiswap(
+  getEstimatedTokenForETH(
+    amountIn: BigNumberish,
+    path: string[],
+    overrides?: CallOverrides
+  ): Promise<BigNumber[]>;
+
+  "getEstimatedTokenForETH(uint256,address[])"(
+    amountIn: BigNumberish,
+    path: string[],
+    overrides?: CallOverrides
+  ): Promise<BigNumber[]>;
+
+  multiswapETHToToken(
+    _token: string,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  "multiswapETHToToken(address)"(
+    _token: string,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
+
+  multiswapTokenToETH(
     token: string,
     users: string[],
     amountsIn: BigNumberish[],
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
-  "multiswap(address,address[],uint256[])"(
+  "multiswapTokenToETH(address,address[],uint256[])"(
     token: string,
     users: string[],
     amountsIn: BigNumberish[],
     overrides?: Overrides
   ): Promise<ContractTransaction>;
 
-  swap(
-    token: string,
-    user: string,
-    amountIn: BigNumberish,
-    overrides?: Overrides
+  poolSwapETH(
+    _token: string,
+    overrides?: PayableOverrides
   ): Promise<ContractTransaction>;
 
-  "swap(address,address,uint256)"(
-    token: string,
-    user: string,
-    amountIn: BigNumberish,
-    overrides?: Overrides
+  "poolSwapETH(address)"(
+    _token: string,
+    overrides?: PayableOverrides
   ): Promise<ContractTransaction>;
+
+  swaporder(
+    arg0: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<{
+    user: string;
+    amountIn: BigNumber;
+    0: string;
+    1: BigNumber;
+  }>;
+
+  "swaporder(uint256)"(
+    arg0: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<{
+    user: string;
+    amountIn: BigNumber;
+    0: string;
+    1: BigNumber;
+  }>;
 
   callStatic: {
-    multiswap(
+    getEstimatedTokenForETH(
+      amountIn: BigNumberish,
+      path: string[],
+      overrides?: CallOverrides
+    ): Promise<BigNumber[]>;
+
+    "getEstimatedTokenForETH(uint256,address[])"(
+      amountIn: BigNumberish,
+      path: string[],
+      overrides?: CallOverrides
+    ): Promise<BigNumber[]>;
+
+    multiswapETHToToken(
+      _token: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    "multiswapETHToToken(address)"(
+      _token: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    multiswapTokenToETH(
       token: string,
       users: string[],
       amountsIn: BigNumberish[],
       overrides?: CallOverrides
     ): Promise<void>;
 
-    "multiswap(address,address[],uint256[])"(
+    "multiswapTokenToETH(address,address[],uint256[])"(
       token: string,
       users: string[],
       amountsIn: BigNumberish[],
       overrides?: CallOverrides
     ): Promise<void>;
 
-    swap(
-      token: string,
-      user: string,
-      amountIn: BigNumberish,
+    poolSwapETH(_token: string, overrides?: CallOverrides): Promise<void>;
+
+    "poolSwapETH(address)"(
+      _token: string,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    "swap(address,address,uint256)"(
-      token: string,
-      user: string,
-      amountIn: BigNumberish,
+    swaporder(
+      arg0: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<void>;
+    ): Promise<{
+      user: string;
+      amountIn: BigNumber;
+      0: string;
+      1: BigNumber;
+    }>;
+
+    "swaporder(uint256)"(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<{
+      user: string;
+      amountIn: BigNumber;
+      0: string;
+      1: BigNumber;
+    }>;
   };
 
   filters: {};
 
   estimateGas: {
-    multiswap(
+    getEstimatedTokenForETH(
+      amountIn: BigNumberish,
+      path: string[],
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    "getEstimatedTokenForETH(uint256,address[])"(
+      amountIn: BigNumberish,
+      path: string[],
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    multiswapETHToToken(
+      _token: string,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    "multiswapETHToToken(address)"(
+      _token: string,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
+
+    multiswapTokenToETH(
       token: string,
       users: string[],
       amountsIn: BigNumberish[],
       overrides?: Overrides
     ): Promise<BigNumber>;
 
-    "multiswap(address,address[],uint256[])"(
+    "multiswapTokenToETH(address,address[],uint256[])"(
       token: string,
       users: string[],
       amountsIn: BigNumberish[],
       overrides?: Overrides
     ): Promise<BigNumber>;
 
-    swap(
-      token: string,
-      user: string,
-      amountIn: BigNumberish,
-      overrides?: Overrides
+    poolSwapETH(
+      _token: string,
+      overrides?: PayableOverrides
     ): Promise<BigNumber>;
 
-    "swap(address,address,uint256)"(
-      token: string,
-      user: string,
-      amountIn: BigNumberish,
-      overrides?: Overrides
+    "poolSwapETH(address)"(
+      _token: string,
+      overrides?: PayableOverrides
+    ): Promise<BigNumber>;
+
+    swaporder(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    "swaporder(uint256)"(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    multiswap(
+    getEstimatedTokenForETH(
+      amountIn: BigNumberish,
+      path: string[],
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "getEstimatedTokenForETH(uint256,address[])"(
+      amountIn: BigNumberish,
+      path: string[],
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    multiswapETHToToken(
+      _token: string,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    "multiswapETHToToken(address)"(
+      _token: string,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
+
+    multiswapTokenToETH(
       token: string,
       users: string[],
       amountsIn: BigNumberish[],
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    "multiswap(address,address[],uint256[])"(
+    "multiswapTokenToETH(address,address[],uint256[])"(
       token: string,
       users: string[],
       amountsIn: BigNumberish[],
       overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    swap(
-      token: string,
-      user: string,
-      amountIn: BigNumberish,
-      overrides?: Overrides
+    poolSwapETH(
+      _token: string,
+      overrides?: PayableOverrides
     ): Promise<PopulatedTransaction>;
 
-    "swap(address,address,uint256)"(
-      token: string,
-      user: string,
-      amountIn: BigNumberish,
-      overrides?: Overrides
+    "poolSwapETH(address)"(
+      _token: string,
+      overrides?: PayableOverrides
+    ): Promise<PopulatedTransaction>;
+
+    swaporder(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    "swaporder(uint256)"(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
   };
 }

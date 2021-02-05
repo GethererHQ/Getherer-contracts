@@ -76,7 +76,7 @@ describe("Getherer", () => {
     const userBalanceBefore = await ethers.provider.getBalance(user1.address);
 
     getherer = getherer.connect(relay);
-    await getherer.swap(tokenA.address, user1.address, toSwap);
+    await getherer.multiswapTokenToETH(tokenA.address, [user1.address], [toSwap]);
 
     const userBalanceAfter = await ethers.provider.getBalance(user1.address);
 
@@ -96,7 +96,7 @@ describe("Getherer", () => {
 
     getherer = getherer.connect(relay);
     // TODO: consider checking the allowanc in contract instead of passing param
-    await getherer.multiswap(tokenA.address, [user1.address, user2.address], [toSwap, toSwap]);
+    await getherer.multiswapTokenToETH(tokenA.address, [user1.address, user2.address], [toSwap, toSwap]);
 
     const user1BalanceAfter = await ethers.provider.getBalance(user1.address);
     const user2BalanceAfter = await ethers.provider.getBalance(user2.address);
@@ -124,7 +124,7 @@ describe("Getherer", () => {
 
     getherer = getherer.connect(relay);
     // TODO: consider checking the allowanc in contract instead of passing param
-    await getherer.multiswap(
+    await getherer.multiswapTokenToETH(
       tokenA.address,
       [user1.address, user2.address, user3.address],
       [toSwap1, toSwap2, toSwap3],
@@ -133,6 +133,60 @@ describe("Getherer", () => {
     const user1BalanceAfter = await ethers.provider.getBalance(user1.address);
     const user2BalanceAfter = await ethers.provider.getBalance(user2.address);
     const user3BalanceAfter = await ethers.provider.getBalance(user3.address);
+
+    console.log("User1 balance", ethers.utils.formatEther(user1BalanceAfter));
+    console.log("User2 balance", ethers.utils.formatEther(user2BalanceAfter));
+    console.log("User3 balance", ethers.utils.formatEther(user3BalanceAfter));
+  });
+
+  it("Multiswap ETH to Token, when input smaller than 1ETH", async function () {
+    // Attempt to swap
+    const toSwap1 = ethers.utils.parseEther("0.33");
+
+    // 3x poolSwap call from user
+    const userArray = [user1, user2, user3];
+
+    for (const user of userArray) {
+      getherer = getherer.connect(user);
+
+      await getherer.poolSwapETH(tokenA.address, { value: toSwap1 });
+    }
+    getherer = getherer.connect(relay);
+
+    await getherer.multiswapETHToToken(tokenA.address);
+
+    const user1BalanceAfter = await tokenA.balanceOf(user1.address);
+    const user2BalanceAfter = await tokenA.balanceOf(user2.address);
+    const user3BalanceAfter = await tokenA.balanceOf(user3.address);
+
+    const poolBalance = await tokenA.balanceOf(getherer.address);
+    // expect(ethers.utils.formatEther(poolBalance)).to.equal("0");
+
+    console.log("User1 balance", ethers.utils.formatEther(user1BalanceAfter));
+    console.log("User2 balance", ethers.utils.formatEther(user2BalanceAfter));
+    console.log("User3 balance", ethers.utils.formatEther(user3BalanceAfter));
+  });
+
+  it("Multiswap ETH to Token, when input bigger than 1ETH", async function () {
+    // Attempt to swap
+    const toSwap1 = ethers.utils.parseEther("1.33");
+
+    // 3x poolswap call from user
+    const userArray = [user1, user2, user3];
+
+    for (const users of userArray) {
+      getherer = getherer.connect(users);
+
+      await getherer.poolSwapETH(tokenA.address, { value: toSwap1 });
+    }
+
+    getherer = getherer.connect(relay);
+
+    await getherer.multiswapETHToToken(tokenA.address);
+
+    const user1BalanceAfter = await tokenA.balanceOf(user1.address);
+    const user2BalanceAfter = await tokenA.balanceOf(user2.address);
+    const user3BalanceAfter = await tokenA.balanceOf(user3.address);
 
     console.log("User1 balance", ethers.utils.formatEther(user1BalanceAfter));
     console.log("User2 balance", ethers.utils.formatEther(user2BalanceAfter));

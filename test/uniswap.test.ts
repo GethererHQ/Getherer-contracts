@@ -72,16 +72,9 @@ describe("Uniswap", () => {
 
     const userRouter = router.connect(user);
 
-    const txRes = await userRouter.swapExactETHForTokens(
-      1,
-      [wethContract.address, tokenAContract.address],
-      user.address,
-      deadline,
-      {
-        value: toSwap,
-      },
-    );
-    console.log(txRes);
+    await userRouter.swapExactETHForTokens(1, [wethContract.address, tokenAContract.address], user.address, deadline, {
+      value: toSwap,
+    });
   });
 
   it("Swap Token to ETH", async function () {
@@ -126,13 +119,12 @@ describe("Uniswap", () => {
 
     await userToken.approve(router.address, toSwap);
 
-    const txRes = await userRouter.swapExactTokensForETH(
+    await userRouter.swapExactTokensForETH(
       toSwap,
       1,
       [tokenAContract.address, wethContract.address],
       user.address,
       deadline,
     );
-    console.log(txRes);
   });
 });
