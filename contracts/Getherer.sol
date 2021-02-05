@@ -31,11 +31,11 @@ contract Getherer {
         router = IUniswapV2Router02(_routerAddress);
     }
 
-    function poolswapETH(address _token, uint256 _amountOut) external payable {
+    function poolSwapETH(address _token) external payable {
         _swapOrders[_token].push(SwapOrder({ user: msg.sender, amountIn: msg.value }));
     }
 
-    function multiswapETH(address _token) external {
+    function multiswapETHToToken(address _token) external {
         uint256 total;
         for (uint256 i = 0; i < _swapOrders[_token].length; i++) {
             total += _swapOrders[_token][i].amountIn;
@@ -56,27 +56,10 @@ contract Getherer {
             uint256 payout = receivedBalance.mul(_swapOrders[_token][i].amountIn).div(total);
             IERC20(_token).transfer(_swapOrders[_token][i].user, payout);
         }
+        delete _swapOrders[_token];
     }
 
-    function swap(
-        address token,
-        address user,
-        uint256 amountIn
-    ) external {
-        // Transfer user funds to contract
-        IERC20(token).transferFrom(user, address(this), amountIn);
-
-        uint256 tokenBalance = IERC20(token).balanceOf(address(this));
-
-        address[] memory path = new address[](2);
-        path[0] = token;
-        path[1] = router.WETH();
-
-        IERC20(token).approve(address(router), amountIn);
-        router.swapExactTokensForETH(amountIn, 1, path, user, block.timestamp);
-    }
-
-    function multiswap(
+    function multiswapTokenToETH(
         address token,
         address payable[] calldata users,
         uint256[] calldata amountsIn
