@@ -45,8 +45,10 @@ contract Getherer {
         path[0] = router.WETH();
         path[1] = _token;
 
+        // Note XXX: Possibly add check to make sure slippage is not too high
         uint256[] memory amountOut = getEstimatedTokenForETH(total, path);
 
+        // Note XXX: Add check that swap was successful
         uint256[] memory amounts =
             router.swapExactETHForTokens{ value: total }(amountOut[1], path, address(this), block.timestamp);
 
