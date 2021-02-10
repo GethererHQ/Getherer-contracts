@@ -45,3 +45,9 @@ Run the Mocha tests:
 ```sh
 $ yarn test
 ```
+
+### Validate a contract with etherscan (requires API ke)
+
+```
+npx hardhat verify --network <network> <DEPLOYED_CONTRACT_ADDRESS> "Constructor argument 1"
+```
